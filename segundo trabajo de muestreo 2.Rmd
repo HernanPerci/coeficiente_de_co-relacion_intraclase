@@ -1,0 +1,177 @@
+---
+title: "Coeficiente de correlación intra-clase"
+author: "Hernan Perci Nuñez Palomino - Oliver Polin Espejo - Susan Villaorduña"
+date: "Ultima edicion `r format(Sys.time(), '%d %B %Y')`"
+output: 
+  word_document:
+    df_print: kable 
+    toc: yes
+    fig_width: 5
+    fig_height: 5
+    fig_caption: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Librerias
+
+```{r}
+
+library(tidyverse)
+
+```
+
+
+## Base de datos
+
+Hay **N*M*(M-1)** puntos en el espacio muestral y para nuestro ejercicio nos piden 4 conglomerados y 3 elementos
+
+```{r}
+
+tabla_de_datos <- function(N, M) {
+    set.seed(123)
+    n <- N*M # numero de elementos
+    datos <- matrix(rnorm(n), ncol = N) # tabla de datos aleatorios provenientes de una distribucion normal estandar.
+    colnames(datos) <- paste("conglomerado", 1:N) # asignar nombres a columnas
+    tabla <- as_tibble(datos)
+    tabla
+}
+
+tabla <- tabla_de_datos(N = 4, M = 3)
+
+
+```
+
+La siguiente tabla nos muestra el ejemplo de 4 conglomerados con 3 elementos cada uno. Los datos generados aleatoriamente por `set.seed(123)` tienen una distribución normal estandar.
+`r tabla`
+
+## Esperanza
+
+Tomamos en cuenta que **E(U) = E(W)**
+
+```{r}
+
+esperanza_de_U <- function(N, M) {
+  U <- c(NA)
+  k <- 0
+  for (i in 1:N) {
+    for (j in 1:M) {
+      k <- k+1
+      U[k] <- tabla[[i]][j]
+    }
+  }
+  media_poblacional <- sum(U)/(N*M)
+  media_poblacional
+}
+
+media_poblacional <- esperanza_de_U(N = 4, M = 3)
+
+
+```
+
+La esperanza de U es de `r media_poblacional`
+
+
+## Varianza
+Tomamos en cuenta que **V(U) = V(W)**
+
+```{r}
+
+varianza_de_U <- function(N, M) {
+  U <- c(NA)
+  k <- 0
+  for (i in 1:N) {
+    for (j in 1:M) {
+      k <- k+1
+      U[k] <- (tabla[[i]][j] - media_poblacional)^2
+    }
+  }
+  varianza_poblacional <- sum(U)/(N*M)
+  varianza_poblacional
+}
+
+varianza_poblacional <- varianza_de_U(N = 4, M = 3)
+
+```
+
+La varianza de U es de `r varianza_poblacional`
+
+## Covarianza (primera forma)
+
+```{r}
+
+covarianza_de_U_y_W_1ra_forma <- function(N, M) {
+  U <- c(NA)
+  l <- 1
+  for (i in 1:N) {
+    for (j in 1:M) {
+      for (k in 1:M) {
+        if (k != j) {
+                U[l] <- (tabla[[i]][j] - media_poblacional)*(tabla[[i]][k] - media_poblacional)
+        } else if (k == j) {
+                  next
+                }
+
+      l <- l+1
+       
+      }
+
+    }
+  }
+  
+  covarianza <- sum(U)/(N*M*(M-1))
+  covarianza
+}
+
+covarianza_1ra_forma <- covarianza_de_U_y_W_1ra_forma(N = 4, M = 3)
+
+```
+
+La covarianza de U y W es de `r covarianza_1ra_forma`
+
+
+## Covarianza (segunda forma)
+
+```{r}
+
+covarianza_de_U_y_W_2da_forma <- function(N, M) {
+  U <- c(NA)
+  l <- 1
+  for (i in 1:N) {
+    for (j in 1:M) {
+      for (k in 1:M) {
+        if (j < k) {
+                U[l] <- (tabla[[i]][j] - media_poblacional)*(tabla[[i]][k] - media_poblacional)
+        } else {
+              next
+            }
+
+      l <- l+1
+       
+      }
+
+    }
+  }
+  
+  covarianza <- 2*sum(U)/(N*M*(M-1))
+  covarianza
+}
+
+covarianza_2da_forma <- covarianza_de_U_y_W_2da_forma(N = 4, M = 3)
+
+```
+
+La covarianza de U y W es de `r covarianza_2da_forma`
+
+
+## Coeficiente de correlacion intraconglomerado
+
+```{r}
+
+Ro_U_W <- covarianza_2da_forma/varianza_poblacional
+
+```
+
+El coeficiente de correlacion intra-clase es de `r Ro_U_W`
