@@ -1,6 +1,6 @@
 ---
 title: "Coeficiente de correlación intra-clase"
-author: "Hernan Perci Nuñez Palomino - Oliver Polin Espejo - Susan Villaorduña"
+author: "Hernan Perci Nuñez Palomino"
 date: "Ultima edicion `r format(Sys.time(), '%d %B %Y')`"
 output: 
   word_document:
